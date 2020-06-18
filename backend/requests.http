@@ -1,0 +1,38 @@
+GET http://localhost:8199/api/v0/data
+
+###
+
+GET http://localhost:8199/api/v0
+
+###
+
+POST http://localhost:8199/api/v0/data
+Content-Type: application/json
+
+{ "id": 1,
+  "name_data": "Газпром",
+  "created": 01.01.2019,
+  "count_data": 2000
+}
+
+###
+
+POST http://localhost:8199/api/v0/data
+Content-Type: application/json
+
+{ "id": 2,
+  "name_data": "Автоваз",
+  "created": 01.01.2019,
+  "count_data": 2500
+}
+
+###
+
+DELETE http://localhost:8199/api/v0
+
+###
+#(1, "Газпром", 01.01.2019, 2000),
+#(2, "Автоваз", 01.01.2019, 2500),
+#(3, "Сбербанк", 05.01.2019, 10000),
+#(4, "Газпром", 10.01.2019, 2500),
+#(5, "Автоваз", 07.01.2019, 2100);
