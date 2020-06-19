@@ -15,6 +15,7 @@ public interface DataServiceInterface {
 
     DataEntity findById(Long id);
     DataEntity save(DataEntity dataEntity);
+    List<DataEntity> saveList(List<DataEntity> dataEntities);
     void delete(Long id);
 
     List<DataEntity> findAll();

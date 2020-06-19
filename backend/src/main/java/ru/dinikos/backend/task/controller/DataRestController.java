@@ -20,6 +20,7 @@ import ru.dinikos.backend.task.exception.DataNotFoundException;
 import ru.dinikos.backend.task.service.DataService;
 
 import javax.servlet.http.HttpServlet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -46,40 +47,53 @@ public class DataRestController extends HttpServlet {
     }
 
     @PostMapping(path = "/data", consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<List<DataEntity>> addData(@RequestBody DataEntity entity) {
-
-        List<DataEntity> list = dataService.findAll();
-        DataEntity result1 = list.stream()
-                .filter((p) -> entity.getName().equals(p.getName()) &&
-                        entity.getCreated().toLocalDate().equals(p.getCreated().toLocalDate()))
-                .findAny().orElse(null);
-        if (result1==null) {
+    public ResponseEntity<List<DataEntity>> addData(@RequestBody List<DataEntity> entities) {
+        List<DataEntity> listAll = dataService.findAll();
+        if (entities.size()==1){
+            DataEntity entity = entities.get(0);
+            System.out.println("Entyty one:" + entity);
+            ResponseEntity<List<DataEntity>> response= stopDuplicates(listAll, entity);
+            if (response!=null) return response;
             dataService.save(entity);
-            return new ResponseEntity<List<DataEntity>>(list, HttpStatus.OK);
+        } else if (entities.size() > 1){
+            List<DataEntity> entities_tmp = new ArrayList<>();
+            for (DataEntity entity: entities) {
+                ResponseEntity<List<DataEntity>> response= stopDuplicates(listAll, entity);
+                if (response==null) {
+                    entities_tmp.add(entity);
+                } else {
+                    return response;
+                }
+            }
+            dataService.saveList(entities_tmp);
+        } else {
+            return new ResponseEntity<List<DataEntity>>(listAll, HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<List<DataEntity>>(list, HttpStatus.NOT_ACCEPTABLE);
+        listAll = dataService.findAll();
+        return new ResponseEntity<List<DataEntity>>(listAll, HttpStatus.OK);
+
 //        list.sort((o1,o2) -> o1.getCreated().compareTo(o2.getCreated()));
     }
-    //@PathVariable для защиты от записи одинаковых значений с разными индексами
     @PutMapping(path = "/data/{id}", consumes = {MediaType.APPLICATION_JSON_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<DataEntity>> updateData( @RequestBody DataEntity entity,
                                                         @PathVariable(value = "id", required = false) Long id) {
-        List<DataEntity> list = dataService.findAll();
+        List<DataEntity> listAll = dataService.findAll();
         if (entity.getId()!=null && entity.getId() == id) {
-            //Защита от записи одинаковых объектов под разными индексами
-            DataEntity result1 = list.stream()
+            //Защита от записи объектов с одинаковыми данными под разными индексами
+            DataEntity result = listAll.stream()
                     .filter((p) -> entity.getName().equals(p.getName()) &&
                             entity.getCreated().toLocalDate().equals(p.getCreated().toLocalDate())&&
                             entity.getCounts().equals(p.getCounts()))
                     .findAny().orElse(null);
-            if (result1==null) {
+            if (result==null) {
                 dataService.save(entity);
-                return new ResponseEntity<List<DataEntity>>(list, HttpStatus.OK);
+                listAll = dataService.findAll();
+                return new ResponseEntity<List<DataEntity>>(listAll, HttpStatus.OK);
             }
 //            list.sort((o1,o2) -> o1.getCreated().compareTo(o2.getCreated()));
         }
-        return new ResponseEntity<List<DataEntity>>(list, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<List<DataEntity>>(listAll, HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping("/data/{id}")
@@ -110,6 +124,17 @@ public class DataRestController extends HttpServlet {
         if (o == null || getClass() != o.getClass()) return false;
         DataRestController that = (DataRestController) o;
         return dataService.equals(that.dataService);
+    }
+
+    // DataEntity result поиск дубликатов по названию и времени(запрет записи дубликатов).
+    // Можно только изменить и удалить элемент с одинаковым названием и временем.
+    private ResponseEntity<List<DataEntity>> stopDuplicates(List<DataEntity> listAll, DataEntity entity){
+        DataEntity result = listAll.stream()
+        .filter((p) -> entity.getName().equals(p.getName()) &&
+                entity.getCreated().toLocalDate().equals(p.getCreated().toLocalDate()))
+        .findAny().orElse(null);
+        if (result==null)  return null;
+        return new ResponseEntity<List<DataEntity>>(listAll, HttpStatus.NOT_ACCEPTABLE);
     }
 }
 

@@ -39,10 +39,18 @@ public class DataService implements DataServiceInterface {
     }
 
     @Override
-    // Защита от проскакивания двойной записи, видимо из за быстрой памяти
-    @Transactional(isolation= Isolation.SERIALIZABLE, timeout=500)
+    // Защита от проскакивания двойной записи
+    @Transactional(isolation= Isolation.SERIALIZABLE, timeout=50)
     public DataEntity save(DataEntity dataEntity) {
         return repository.save(dataEntity);
+    }
+
+
+    @Override
+    // Защита от проскакивания двойной записи
+    @Transactional(isolation= Isolation.SERIALIZABLE, timeout=50)
+    public List<DataEntity> saveList(List<DataEntity> dataEntities) {
+        return repository.saveAll(dataEntities);
     }
 
     @Override

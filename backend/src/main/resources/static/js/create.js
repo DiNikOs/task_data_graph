@@ -1,8 +1,5 @@
 $(document).ready(function (event) {
 
-    // function jsonDate() {
-    //
-    // }
     let create_data;
     let create_data_tmp;
     let tabl_arr = [];
@@ -16,28 +13,28 @@ $(document).ready(function (event) {
     // console.log("request2: ", request);
     // request.send();
     get__ajax__submit();
-
+    tableRecoin();
 
     $("#btn-add").click(function () {
         $("#myModal").modal({show: true});
     });
     $("#btn-save").click(function () {
-        var create_data = {}
-        create_data["created"] = $("#created").val();
+        arr_post =[];
+        tableRecoin();
+        let create_data = {};
         create_data["name"] = $("#name").val();
-        create_data["counts"] = $("#counts").val();
-        console.log("Result create : ",  create_data);
-        arr_post = no_rpt_arr(tabl_arr, create_data);
-        // Траблы!!!
+        create_data["created"] = $("#created").val();
+        create_data["counts"] = parseInt($("#counts").val());
+        let arr_tmp = [];
+        arr_tmp.push( create_data)
+        console.log("Result create : ",  arr_tmp);
+        console.log("Table : ",  tabl_arr);
+        arr_post = no_rpt_arr(tabl_arr,arr_tmp);
         console.log("Result ARR : ", arr_post);
         if (arr_post.length>0){
-            $(arr_post).each(function (index, item) {
-                post__ajax__submit(item);
-            });
+                post__ajax__submit(arr_post);
         }
-        // post__ajax__submit(create_data);
         $("#myModal").modal({show: false});
-        tableRecoin();
     });
     $("#btn-close").click(function () {
         get__ajax__submit();
@@ -47,8 +44,6 @@ $(document).ready(function (event) {
     $("#btn-x").click(function () {
         get__ajax__submit();
         $("#myModal").modal({show: false});
-
-        tableRecoin();
     });
 
     $("#btn-addList").click(function () {
@@ -58,34 +53,33 @@ $(document).ready(function (event) {
         arr_post = no_rpt_arr(tabl_arr, arr_tmp);
         console.log("Result ARR : ", arr_post);
         if (arr_post.length>0){
-            $(arr_post).each(function (index, item) {
-                post__ajax__submit(item);
-            });
+            post__ajax__submit(arr_post);
         }
         arr_post = [];
     });
 
     $('#create-form2').on("click", '#btn-edit', function () {
-        let id = $(this).val();
+        let ID = $(this).val();
         create_data = {}
-        create_data["id"] = $("#id_input_" + id).val();
-        create_data["created"] = $("#created_input_" + id).val();
-        create_data["name"] = $("#name_input_" + id).val();
-        create_data["counts"] = $("#counts_input_" + id).val();
-        console.log("Submit edit  inp: ", JSON.stringify(create_data) + ', ' + id);
+        create_data["id"] = $("#id_input_" + ID).val();
+        create_data["created"] = $("#created_input_" + ID).val();
+        create_data["name"] = $("#name_input_" + ID).val();
+        create_data["counts"] = $("#counts_input_" + ID).val();
+        spanRecoin(ID);
+        console.log("Submit edit  inp: ", JSON.stringify(create_data) + ', ' + ID);
         //защита от дубликатов
         if (!_.isEqual(create_data, create_data_tmp)){
-            put__ajax__submit(create_data, id);
+            put__ajax__submit(create_data, ID);
             tableRecoin();
             create_data_tmp = 0;
         }
     });
 
     $('#create-form2').on("click", '#btn-del', function () {
-        let id = $(this).val();
-        console.log("Submit del : ", id);
-        if (id > 0) {
-            del__ajax__submit(id);
+        let ID = $(this).val();
+        console.log("Submit del : ", ID);
+        if (ID > 0) {
+            del__ajax__submit(ID);
             tableRecoin();
         }
     });
@@ -96,12 +90,7 @@ $(document).ready(function (event) {
             $('.edit_tr').hover(
                 function () {
                     let ID = $(this).attr('id');
-                    create_data_tmp = {}
-                    create_data_tmp["id"] = $("#id_" + ID).text();
-                    create_data_tmp["created"] = $("#created_" + ID).text();
-                    create_data_tmp["name"] = $("#name_" + ID).text();
-                    create_data_tmp["counts"] = $("#counts_" + ID).text();
-                    // console.log("Index HOVER : ", JSON.stringify(create_data_tmp) + ', ' +ID);
+                    spanRecoin(ID);
                 }
             ).change();
             $('.edit_tr').each(function (index, item) {
@@ -112,12 +101,7 @@ $(document).ready(function (event) {
 
     $('#receipts').on('mouseover', 'tr', function () {
         let ID = $(this).attr('id');
-        create_data_tmp = {}
-        create_data_tmp["id"] = $("#id_" + ID).text();
-        create_data_tmp["created"] = $("#created_" + ID).text();
-        create_data_tmp["name"] = $("#name_" + ID).text();
-        create_data_tmp["counts"] = $("#counts_" + ID).text();
-        // console.log("MOUSEOVER HOVER : ", JSON.stringify(create_data_tmp) + ', ' +ID);
+        spanRecoin(ID);
     }).change();
 
     $('#receipts').on('click', 'tr', function () {
@@ -130,7 +114,6 @@ $(document).ready(function (event) {
         $("#name_input_" + ID).show();
         $("#counts_input_" + ID).show();
     }).change();
-
 // Edit input box click action
     $(".editbox").mouseup(function () {
         return false;
@@ -143,7 +126,7 @@ $(document).ready(function (event) {
         $(".editbox").hide();
         $(".text").show();
     });
-
+// сохранение в массиве объектов селесторов спан (после перерисовки) для json
     function tableRecoin() {
         tabl_arr = [];
         $('.edit_tr').each(function (index, item) {
@@ -157,7 +140,15 @@ $(document).ready(function (event) {
             tabl_arr.push(data_tmp);
         });
         console.log("Data TMP:",  tabl_arr);
-        // get__ajax__submit();
+    }
+
+// сохранение в массиве селесторов спан (после перерисовки) для json
+    function spanRecoin(ID) {
+        create_data_tmp = {};
+        create_data_tmp["id"] = $("#id_" + ID).text();
+        create_data_tmp["created"] = $("#created_" + ID).text();
+        create_data_tmp["name"] = $("#name_" + ID).text();
+        create_data_tmp["counts"] = $("#counts_" + ID).text();
     }
 
     function no_rpt_arr(array, data_json){
@@ -166,11 +157,11 @@ $(document).ready(function (event) {
             let repeat = array.some(function(element) {
                 let a = JSON.stringify(element);
                 let b = JSON.stringify(tmp);
-                console.log("Data ELEMENT: ", a);
-                console.log("Data tmp FIND:", b);
+                // console.log("Data ELEMENT: ", a);
+                // console.log("Data tmp FIND:", b);
                 return _.isEqual(a, b);
             });
-            console.log("Result Tabl : ", repeat);
+            console.log("Repit : ", repeat + ',' + tmp);
             if (!repeat){
                 arr_post.push(tmp);
                 console.log("Array to post:", arr_post);
@@ -201,7 +192,6 @@ $(document).ready(function (event) {
                 cache: false,
                 timeout: 600000,
                 success: function (data) {
-                    // alert("Data upload POST ;)", JSON.stringify(data));
                     var json = "<h4>Ajax Response</h4><pre>"
                         + JSON.stringify(data, null, 4) + "</pre>";
                     $('#feedback').html(json);
@@ -211,7 +201,6 @@ $(document).ready(function (event) {
                     $("#btn-create").prop("disabled", false);
                 },
                 error: function (e) {
-                    // alert("Data upload not success! = ");
                     var json = "<h4>Ajax Response</h4><pre>"
                         + e.responseText + "</pre>";
                     $('#feedback').html(json);
@@ -236,7 +225,6 @@ $(document).ready(function (event) {
                 cache: false,
                 timeout: 600000,
                 success: function (data) {
-                    // alert("Data upload PUT ;)", JSON.stringify(data));
                     var json = "<h4>Ajax Response</h4><pre>"
                         + JSON.stringify(data, null, 4) + "</pre>";
                     $('#feedback').html(json);
@@ -246,14 +234,12 @@ $(document).ready(function (event) {
                     $("#btn-edit").prop("disabled", false);
                 },
                 error: function (e) {
-                    // alert("Data upload not success! = ");
                     var json = "<h4>Ajax Response</h4><pre>"
                         + e.responseText + "</pre>";
                     $('#feedback').html(json);
 
                     console.log("ERROR : ", e);
                     $("#btn-edit").prop("disabled", false);
-
                 }
             });
         }
@@ -273,7 +259,6 @@ $(document).ready(function (event) {
                 cache: false,
                 timeout: 600000,
                 success: function (data) {
-                    // alert("Data DEL ;)", JSON.stringify(data));
                     var json = "<h4>Ajax Response</h4><pre>"
                         + JSON.stringify(data, null, 4) + "</pre>";
                     $('#feedback').html(json);
@@ -283,7 +268,6 @@ $(document).ready(function (event) {
                     $("#btn-del").prop("disabled", false);
                 },
                 error: function (e) {
-                    // alert("Data upload not success! = ");
                     var json = "<h4>Ajax Response</h4><pre>"
                         + e.responseText + "</pre>";
                     $('#feedback').html(json);
@@ -307,7 +291,6 @@ $(document).ready(function (event) {
             cache: false,
             timeout: 600000,
             success: function (data) {
-                // alert("Data upload ;)", JSON.stringify(data));
                 var json = "<h4>Ajax Response</h4><pre>"
                     + JSON.stringify(data, null, 4) + "</pre>";
                 $('#feedback').html(json);
@@ -316,7 +299,6 @@ $(document).ready(function (event) {
                 console.log("SUCCESS : ", data);
             },
             error: function (e) {
-                // alert("Data upload not success! = ");
                 var json = "<h4>Ajax Response</h4><pre>"
                     + e.responseText + "</pre>";
                 $('#feedback').html(json);
