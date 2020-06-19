@@ -57,12 +57,11 @@ public class DataRestController extends HttpServlet {
             dataService.save(entity);
         } else if (entities.size() > 1){
             List<DataEntity> entities_tmp = new ArrayList<>();
+            ResponseEntity<List<DataEntity>> response;
             for (DataEntity entity: entities) {
-                ResponseEntity<List<DataEntity>> response= stopDuplicates(listAll, entity);
+                response= stopDuplicates(listAll, entity);
                 if (response==null) {
                     entities_tmp.add(entity);
-                } else {
-                    return response;
                 }
             }
             dataService.saveList(entities_tmp);
