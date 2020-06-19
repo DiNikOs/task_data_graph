@@ -12,8 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+
 import ru.dinikos.backend.task.entity.DataEntity;
 import ru.dinikos.backend.task.exception.DataErrorResponse;
 import ru.dinikos.backend.task.exception.DataNotFoundException;
@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServlet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
+
 
 @RestController
 @RequestMapping("/api/v0")
@@ -70,9 +70,8 @@ public class DataRestController extends HttpServlet {
         }
         listAll = dataService.findAll();
         return new ResponseEntity<List<DataEntity>>(listAll, HttpStatus.OK);
-
-//        list.sort((o1,o2) -> o1.getCreated().compareTo(o2.getCreated()));
     }
+
     @PutMapping(path = "/data/{id}", consumes = {MediaType.APPLICATION_JSON_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<List<DataEntity>> updateData( @RequestBody DataEntity entity,
@@ -90,7 +89,6 @@ public class DataRestController extends HttpServlet {
                 listAll = dataService.findAll();
                 return new ResponseEntity<List<DataEntity>>(listAll, HttpStatus.OK);
             }
-//            list.sort((o1,o2) -> o1.getCreated().compareTo(o2.getCreated()));
         }
         return new ResponseEntity<List<DataEntity>>(listAll, HttpStatus.NOT_FOUND);
     }
