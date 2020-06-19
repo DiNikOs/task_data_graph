@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	  xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+	<head  th:remove="tag" th:replace="fragments/header.html :: head">
+	</head>
+
+	<body class="skin-orange">
+	<!-- HEADER -->
+	<header class="primary"  th:remove="tag" th:replace="fragments/header.html :: header">
+	</header>
+	<!-- /HEADER -->
+	<div class="container" id="container">
+		<!-- Trigger the modal with a button -->
+		<button type="button" class="btn btn-success btn-md" id="btn-add">Add</button>
+		<button type="button" class="btn btn-success btn-md" id="btn-addList" value="Submit">Add Start Data</button>
+		<!-- Modal -->
+		<div class="modal fade" id="myModal" role="dialog">
+			<div class="modal-dialog">
+				<!-- Modal content-->
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" id="btn-x">Close</button>
+					</div>
+					<div class="modal-body">
+						<form action="/" method="post">
+							<div class="form-group">
+								<label>Дата</label>
+								<input type="date" id="created" name="created" value="2019-05-05" placeholder="enter created"/>
+							</div>
+							<div class="form-group">
+								<label>Ценная бумага</label>
+								<input class="form-control" type="text" id="name" name="name" value="Газпром" placeholder="enter name"/>
+							</div>
+								<label>Стоимость</label>
+								<input type="number" id="counts" name="counts" value="5000" placeholder="enter count"/>
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-danger btn-md" id="btn-save">Save</button>
+						<button type="button" class="btn btn-secondary" data-dismiss="modal" id="btn-close">Close</button>
+					</div>
+				</div>
+
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-8 col-sm-12 col-xs-12">
+				<div id="chart_div" style="width: 900px; height: 350px;"></div>
+			</div>
+			<div class="col-md-8 col-sm-12 col-xs-12">
+				<br>
+				<div class="line transparent little"></div>
+				<div class="row">
+					<form id="create-form2" onsubmit="return false;">
+						<table class="table-border" border="1" id="receipts" width="600" >
+<!--							style="display:contents"-->
+							<tr class="edit_th">
+								<th>Id</th>
+								<th>Name</th>
+								<th>Created</th>
+								<th>Count</th>
+								<th width="50">Edit</th>
+								<th width="50">Delete</th>
+							</tr>
+							<tr class="edit_tr">
+								<td class="edit_td_id"></td>
+								<td class="edit_td"><a >Product</a></td>
+								<td class="edit_td">Created</td>
+								<td class="edit_td_con">Count</td>
+								<td class="edit_td_btn"><a>Edit</a></td>
+								<td class="edit_td_btn"><a>Delete</a></td>
+							</tr>
+						</table>
+					</form>
+					<div class="col-md-6 col-sm-6">
+						<div id="feedback"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- FOOTER -->
+	<footer th:replace="fragments/footer :: footer"></footer>	<!-- /FOOTER -->
+
+<!--	<script>-->
+<!--		function readFile(input) {-->
+<!--			console.log('Input:', input.files[0]);-->
+<!--			let fi = new File(["id", "name","created","counts"], "data_table.json", {-->
+<!--				type: "application/json",-->
+<!--			});-->
+<!--			console.log('Fi:', fi);-->
+<!--			let file = input.files[0];-->
+<!--			console.log('File:', file);-->
+<!--			let reader = new FileReader();-->
+
+<!--			reader.readAsText(fi);-->
+
+<!--			reader.onload = function() {-->
+<!--				console.log('Result:', reader.result);-->
+<!--			};-->
+
+<!--			reader.onerror = function() {-->
+<!--				console.log('Reader Error:', reader.error);-->
+<!--			};-->
+
+<!--		}-->
+<!--	</script>-->
+
+	<script type="text/javascript" th:src="@{/js/create.js}"></script>
+	<script type="text/javascript" th:src="@{/js/graph.js}"></script>
+
+	</body>
+</html>
