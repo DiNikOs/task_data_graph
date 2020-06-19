@@ -10,8 +10,6 @@ package ru.dinikos.backend.task.entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.format.annotation.DateTimeFormat;
-import sun.util.calendar.BaseCalendar;
 
 import javax.persistence.*;
 import java.sql.Date;
