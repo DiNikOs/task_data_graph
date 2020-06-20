@@ -19,14 +19,18 @@ $(document).ready(function (event) {
         $("#myModal").modal({show: true});
     });
     $("#btn-save").click(function () {
+
         arr_post =[];
         tableRecoin();
         let create_data = {};
         create_data["name"] = $("#name").val();
         create_data["created"] = $("#created").val();
         create_data["counts"] = parseInt($("#counts").val());
+        if(fnCheckFields(create_data)){
+            return alert(error_msg);
+        };
         let arr_tmp = [];
-        arr_tmp.push( create_data)
+        arr_tmp.push(create_data)
         console.log("Result create : ",  arr_tmp);
         console.log("Table : ",  tabl_arr);
         arr_post = no_rpt_arr(tabl_arr,arr_tmp);
@@ -65,6 +69,9 @@ $(document).ready(function (event) {
         create_data["created"] = $("#created_input_" + ID).val();
         create_data["name"] = $("#name_input_" + ID).val();
         create_data["counts"] = $("#counts_input_" + ID).val();
+        if(fnCheckFields(create_data)){
+            return alert(error_msg);
+        };
         spanRecoin(ID);
         console.log("Submit edit  inp: ", JSON.stringify(create_data) + ', ' + ID);
         //защита от дубликатов
@@ -349,16 +356,16 @@ function tableDraw(data) {
         console.log(item);
         var $row = $('<tr id="' + item.id + '" class="edit_tr">' +
             '<td class="edit_td_id"><span id="id_' + item.id + '" class="text" >'+ item.id +'</span>' +
-            '<input type="number" value="' + item.id + '" class="editbox" id="id_input_' + item.id + '"/></td>' +
+            '<input type="number" value="' + item.id + '" class="editbox" id="id_input_' + item.id + '"></td>' +
             '<td class="edit_td"><span id="name_' + item.id + '" class="text">' + item.name + '</span>' +
-            '<input type="text" value="' + item.name + '" class="editbox" id="name_input_' + item.id + '"/></td>' +
+            '<input type="text" value="' + item.name + '" class="editbox" id="name_input_' + item.id + '" required></td>' +
             '<td class="edit_td">' +
             '<span type="data" id="created_' + item.id + '" class="text" required pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}">' + item.created + '</span>' +
-            '<input type="data" value="' + item.created + '" class="editbox" id="created_input_' + item.id + '" name="created" required pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"/>' +
+            '<input type="data" value="' + item.created + '" class="editbox" id="created_input_' + item.id + '" name="created" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" required>' +
             '</td>' +
             '<td class="edit_td_con">' +
             '<span id="counts_' + item.id + '" class="text">' + item.counts + '</span>' +
-            '<input type="number" value="' + item.counts + '" class="editbox" id="counts_input_' + item.id + '"/>' +
+            '<input type="number" value="' + item.counts + '" class="editbox" id="counts_input_' + item.id + '">' +
             '</td>' +
             '<td class="edit_td_btn">' +
             '<button  type="submit" class="btn btn-primary btn-sm" id="btn-edit" value="' + item.id + '" ><img width="25" height="25" border="1"  src="images/edit.png"/></button></td>' +
@@ -371,6 +378,18 @@ function tableDraw(data) {
     });
 }
 
+function fnCheckFields(input){
+    console.log('Cheks require:', input);
+    let name = input.name;
+    let created = input.created;
+    if (name == '' || created == '') {
+        return true;
+    }
+}
+
+let error_msg = "Пожалуйста, заполните все обязательные поля." + '\n'
+        + "Дата в формате дд.мм.гггг." + '\n'
+        + "Название ценной бумаги не может быть пустым!" + '\n';
 
 let jsonArr =
     [
