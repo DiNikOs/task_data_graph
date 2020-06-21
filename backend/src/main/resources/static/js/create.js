@@ -26,10 +26,18 @@ $(document).ready(function (event) {
         create_data["name"] = $("#name").val();
         create_data["created"] = $("#created").val();
         create_data["counts"] = parseInt($("#counts").val());
+        console.log("create_data.counts : ",  create_data.counts);
+        if (isNaN(create_data.counts)) {
+            create_data.counts = 0;
+            $("#counts").val(0);
+        }
+        console.log("create_data.counts2 : ",  create_data.counts);
+        console.log("Created Save : ", create_data);
         if(fnCheckFields(create_data)){
             return alert(error_msg);
         };
         let arr_tmp = [];
+        create_data.created = date_to_ru(create_data.created);
         arr_tmp.push(create_data)
         console.log("Result create : ",  arr_tmp);
         console.log("Table : ",  tabl_arr);
@@ -37,16 +45,17 @@ $(document).ready(function (event) {
         console.log("Result ARR : ", arr_post);
         if (arr_post.length>0){
                 post__ajax__submit(arr_post);
-        }
+        } else return alert('Попытка повторной отправки данных!'  + '\n' +
+        'Данные с одинаковым названием и временем изменять в таблице.');
         $("#myModal").modal({show: false});
     });
     $("#btn-close").click(function () {
-        get__ajax__submit();
+        // get__ajax__submit();
         $("#myModal").modal({show: false});
         tableRecoin();
     });
     $("#btn-x").click(function () {
-        get__ajax__submit();
+        // get__ajax__submit();
         $("#myModal").modal({show: false});
     });
 
@@ -58,7 +67,7 @@ $(document).ready(function (event) {
         console.log("Result ARR : ", arr_post);
         if (arr_post.length>0){
             post__ajax__submit(arr_post);
-        }
+        } else return alert('Попытка повторной отправки данных!');
         arr_post = [];
     });
 
@@ -66,20 +75,24 @@ $(document).ready(function (event) {
         let ID = $(this).val();
         create_data = {}
         create_data["id"] = $("#id_input_" + ID).val();
-        create_data["created"] = $("#created_input_" + ID).val();
         create_data["name"] = $("#name_input_" + ID).val();
+        let date_tmp = $("#created_input_" + ID).val();
+        create_data["created"] =  date_to_sql(date_tmp);
         create_data["counts"] = $("#counts_input_" + ID).val();
+        console.log("create_data:", date_tmp + ', ' + create_data.created);
         if(fnCheckFields(create_data)){
             return alert(error_msg);
         };
         spanRecoin(ID);
         console.log("Submit edit  inp: ", JSON.stringify(create_data) + ', ' + ID);
         //защита от дубликатов
+        create_data_tmp.created = date_to_sql(create_data_tmp.created);
+        if (create_data.counts=="") create_data.counts = 0;
         if (!_.isEqual(create_data, create_data_tmp)){
             put__ajax__submit(create_data, ID);
             tableRecoin();
             create_data_tmp = 0;
-        }
+        } else return alert('Попытка повторной отправки данных!');
     });
 
     $('#create-form2').on("click", '#btn-del', function () {
@@ -114,11 +127,11 @@ $(document).ready(function (event) {
     $('#receipts').on('click', 'tr', function () {
         let ID = $(this).attr('id');
         console.log("TR : ", ID);
-        $("#created_" + ID).hide();
         $("#name_" + ID).hide();
+        $("#created_" + ID).hide();
         $("#counts_" + ID).hide();
-        $("#created_input_" + ID).show();
         $("#name_input_" + ID).show();
+        $("#created_input_" + ID).show();
         $("#counts_input_" + ID).show();
     }).change();
 // Edit input box click action
@@ -139,7 +152,7 @@ $(document).ready(function (event) {
         $('.edit_tr').each(function (index, item) {
             let data_tmp;
             let ID = $(item).attr('id');
-            console.log("Id:",  ID);
+            // console.log("Id:",  ID);
             data_tmp = {}
             data_tmp["name"] = $("#name_" + ID).text();
             data_tmp["created"] = $("#created_" + ID).text();
@@ -153,23 +166,24 @@ $(document).ready(function (event) {
     function spanRecoin(ID) {
         create_data_tmp = {};
         create_data_tmp["id"] = $("#id_" + ID).text();
-        create_data_tmp["created"] = $("#created_" + ID).text();
         create_data_tmp["name"] = $("#name_" + ID).text();
+        create_data_tmp["created"] = $("#created_" + ID).text();
         create_data_tmp["counts"] = $("#counts_" + ID).text();
     }
 
     function no_rpt_arr(array, data_json){
         for (let i = 0; i < data_json.length; i++) {
             let tmp = data_json[i];
+            tmp.created = date_to_ru(tmp.created);
             let repeat = array.some(function(element) {
-                let a = JSON.stringify(element);
-                let b = JSON.stringify(tmp);
-                // console.log("Data ELEMENT: ", a);
-                // console.log("Data tmp FIND:", b);
+                let a = JSON.stringify(element.name + element.created);
+                let b = JSON.stringify(tmp.name + tmp.created);
+                console.log("A : ", a);
+                console.log("B : ", b);
                 return _.isEqual(a, b);
             });
-            console.log("Repit : ", repeat + ',' + tmp);
             if (!repeat){
+                tmp.created = date_to_sql(tmp.created);
                 arr_post.push(tmp);
                 console.log("Array to post:", arr_post);
             }
@@ -340,28 +354,20 @@ function tableDraw(data) {
     $('#receipts tbody').append($row);
     $(data).each(function (index, item) {
         let parts = item.created.split('-');
-        // console.log('Data Time:', item.created);
-        let dTime = new Date(item.created);
-        // var options = {
-        //     era: false,
-        //     year: 'numeric',
-        //     month: 'numeric',
-        //     day: 'numeric',
-        //     weekday: false,
-        //     timezone: false,
-        //     hour: false,
-        //     minute: false,
-        //     second: false
-        // };
-        console.log(item);
-        var $row = $('<tr id="' + item.id + '" class="edit_tr">' +
+        let dTime = new Date(Date.UTC(parts[0], parts[1]-1, parts[2]));
+        let date = date_to_sql(item.created);
+        // console.log('Date:', date);
+
+        var $row = $('<tr id="' + item.id + '" class="edit_tr form-group">' +
             '<td class="edit_td_id"><span id="id_' + item.id + '" class="text" >'+ item.id +'</span>' +
             '<input type="number" value="' + item.id + '" class="editbox" id="id_input_' + item.id + '"></td>' +
             '<td class="edit_td"><span id="name_' + item.id + '" class="text">' + item.name + '</span>' +
             '<input type="text" value="' + item.name + '" class="editbox" id="name_input_' + item.id + '" required></td>' +
-            '<td class="edit_td">' +
-            '<span type="data" id="created_' + item.id + '" class="text" required pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}">' + item.created + '</span>' +
-            '<input type="data" value="' + item.created + '" class="editbox" id="created_input_' + item.id + '" name="created" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" required>' +
+            '<td class="edit_td" type="data">' +
+            '<time datetime="2013-04-01">' +
+            '<span type="data" id="created_' + item.id + '" class="text" >' + dTime.toLocaleDateString("ru-Ru") + '</span>' +
+            '<input type="data" value="' + dTime.toLocaleDateString("ru-Ru") + '" class="editbox" id="created_input_' + item.id + '" name="created" placeholder="дд.мм.гггг" required>' +
+            '</time>' +
             '</td>' +
             '<td class="edit_td_con">' +
             '<span id="counts_' + item.id + '" class="text">' + item.counts + '</span>' +
@@ -372,22 +378,74 @@ function tableDraw(data) {
             '<td class="edit_td_btn">' +
             ' <button  type="submit" class="btn btn-primary btn-sm" id="btn-del" value="' + item.id + '" ><img width="25" height="25" border="1"  src="images/x.png"/></button></td>' +
             '</tr>'); // создаем tr
-        // $("#created_input_"+ item.id).val(dTime);
-        // $("#created_input_"+ item.id).attr('type', 'date');
         $('#receipts tbody').append($row);
     });
 }
 
 function fnCheckFields(input){
-    console.log('Cheks require:', input);
-    let name = input.name;
-    let created = input.created;
-    if (name == '' || created == '') {
+    let name = input.name.toString();
+    let parts = date_to_sql(input.created).split('-');
+    let date = new Date(input.created);
+    let tr = name == "";
+    console.log('require parts:', parts + ', len:' + parts.length + ' : ' + $.inArray("", parts) + ', input: ' + $(input));
+    if ((parts.length<3) || (name == "" ) || ($.inArray("", parts) > -1) || isNaN(date.getDate())) {
+        console.log('TRUE!');
         return true;
     }
 }
+// if spliter '.' then ru-> sql, if spliter '-' then sql -> ru
+function date_sql_ru(input, spliter){
+        let date = null;
+        let split = spliter.toString();
+        let parts = (input.created).split(split);
+        let dot = '.';
+        let dash = '-';
+        if (parts.length == 3 && parts[2].length == 4) {
+            split = dot ? split = dash : split = dot;
+            date = (parts[2] + split + parts[1] + split + parts[0]);
+            console.log('DATE:', date);
+        }
+        return date;
+}
 
-let error_msg = "Пожалуйста, заполните все обязательные поля." + '\n'
+// checks and converts the date to sql format
+function date_to_sql(input) {
+    let parts = input.split('.');
+    if (parts!=input && parts.length==3){
+        let year = add_null(parts[2], 4);
+        let month = add_null(parts[1], 2);
+        let day = add_null(parts[0], 2);
+        let date = new Date(Date.UTC(year, month-1, day));
+        // console.log('date_to_sql Date TRUE:', date + ', Item date:' +  year + ',' + month + ',' + day);
+        if (!isNaN(date.getDate())){
+            let ret = year + '-' + month + '-' + day;
+            console.log('date_to_sql RET:', ret);
+            return ret;
+        }
+    } return input;
+}
+
+function add_null(date, count) {
+        let date_tmp = date.toString();
+        let len = date_tmp.length;
+        // console.log('add null:', date_tmp + ', len =' + len + ', con=' + count);
+        if (len<1 || len>count) return "";
+        while (date_tmp.length < count) {
+            date_tmp = '0' + date_tmp;
+        }
+        return date_tmp;
+}
+
+// checks and converts the date to Locale RU format
+function date_to_ru(input) {
+    let parts = input.split('-');
+    console.log('date_to_ru:', parts);
+    if (parts!=input){
+        return (parts[2] + '.' + parts[1] + '.' + parts[0]);
+    } return input;
+}
+
+let error_msg = "Пожалуйста, заполните все обязательные поля в надлежащем виде." + '\n'
         + "Дата в формате дд.мм.гггг." + '\n'
         + "Название ценной бумаги не может быть пустым!" + '\n';
 

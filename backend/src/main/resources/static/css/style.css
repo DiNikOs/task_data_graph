@@ -5,7 +5,7 @@ body
 }
 .editbox
 {
-    display:none
+    display:contents;
 }
 td
 {
@@ -14,7 +14,7 @@ td
 .editbox
 {
     font-size:16px;
-    width:120px;
+    width:190px;
     background-color:#ffffcc;
     border:solid 1px #000;
     padding:1px;
@@ -45,7 +45,7 @@ th
 
 .edit_td
 {
-    width:150px;
+    width:200px;
     vertical-align:center;
     horiz-align: center;
     text-align: center;
@@ -53,7 +53,7 @@ th
 
 .edit_td_con
 {
-    width:130px;
+    width:200px;
     vertical-align:center;
     horiz-align: center;
     text-align: center;
@@ -70,5 +70,6 @@ th
 {
     font-size:12px;
 }
+
 
 
